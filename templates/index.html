@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Analisi Lotto Statistica Avanzata</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 900px; margin: auto; padding: 20px; }
+        .result-box { border: 1px solid #ccc; padding: 15px; margin-top: 20px; }
+        .result-box h3 { border-bottom: 2px solid #eee; padding-bottom: 5px; }
+        .number-list { list-style: none; padding: 0; }
+        .number-list li { display: inline-block; background: #007bff; color: white; padding: 5px 10px; margin: 3px; border-radius: 5px; font-weight: bold; }
+        .hot { background: #dc3545 !important; } /* Rosso per i numeri caldi */
+        .cold { background: #17a2b8 !important; } /* Azzurro per i numeri freddi */
+        .pattern { background: #ffc107; color: #333 !important; } /* Giallo per i pattern */
+        .ritardo { background: #6c757d; } /* Grigio per i ritardatari */
+        .frequenti { background: green; } /* Verde per i frequenti storici */
+    </style>
+</head>
+<body>
+    <h1>Analisi Statistica Lotto</h1>
+    <form method="POST">
+        <label for="ruota">Seleziona Ruota:</label>
+        <select name="ruota" id="ruota">
+            {% for r in ruote %}
+                <option value="{{ r }}" {% if r == selected_ruota %}selected{% endif %}>{{ r }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Esegui Analisi</button>
+    </form>
+
+    {% if analisi %}
+        {% if analisi.error %}
+            <p style="color: red;">Errore: {{ analisi.error }}</p>
+        {% else %}
+            <div class="result-box">
+                <h2>Risultati Analisi per {{ analisi.ruota }}</h2>
+                <p>Ultima Estrazione Considerata: <strong>{{ analisi.ultima_estrazione }}</strong></p>
+                
+                <h3>📈 Tendenze Storiche</h3>
+                
+                <h4>Numeri Più Ritardatari Attuali</h4>
+                <p>I numeri che non escono da più tempo (ottica "recupero").</p>
+                <ul class="number-list">
+                    {% for num, ritardo in analisi.ritardatari_attuali %}
+                        <li class="ritardo">{{ num }} (Ritardo: {{ ritardo }})</li>
+                    {% endfor %}
+                </ul>
+
+                <h4>Numeri Più Frequenti (Storico Assoluto)</h4>
+                <p>I numeri usciti più volte in assoluto dal 1880.</p>
+                <ul class="number-list">
+                    {% for num, count in analisi.frequenti_assoluti %}
+                        <li class="frequenti">{{ num }} (Totale: {{ count }})</li>
+                    {% endfor %}
+                </ul>
+                
+                <hr>
+
+                <h3>🔥 Breve Periodo (Ultime {{ 50 }} Estrazioni)</h3>
+
+                <h4>"Hot" Numbers (Più Frequenti)</h4>
+                <p>Numeri che stanno uscendo molto più spesso della media recente.</p>
+                <ul class="number-list">
+                    {% for num, count in analisi.hot_numbers %}
+                        <li class="hot">{{ num }} (Frequenza: {{ count }})</li>
+                    {% endfor %}
+                </ul>
+                
+                <h4>"Cold" Numbers (Meno Frequenti)</h4>
+                <p>Numeri che sono stati estratti raramente nel breve periodo.</p>
+                <ul class="number-list">
+                    {% for num, count in analisi.cold_numbers %}
+                        <li class="cold">{{ num }} (Frequenza: {{ count }})</li>
+                    {% endfor %}
+                </ul>
+                
+                <hr>
+
+                <h3>🔢 Pattern sull'Ultima Estrazione</h3>
+                
+                <h4>Numeri Gemelli Estratti</h4>
+                <ul class="number-list">
+                    {% if analisi.pattern_ultima.gemelli %}
+                        {% for num in analisi.pattern_ultima.gemelli %}
+                            <li class="pattern">{{ num }}</li>
+                        {% endfor %}
+                    {% else %}
+                        <li>Nessun Gemello estratto nell'ultima giocata.</li>
+                    {% endif %}
+                </ul>
+
+                <h4>Sequenze Consecutive Estratte</h4>
+                <ul class="number-list">
+                    {% if analisi.pattern_ultima.consecutivi %}
+                        {% for seq in analisi.pattern_ultima.consecutivi %}
+                            <li class="pattern">{{ seq }}</li>
+                        {% endfor %}
+                    {% else %}
+                        <li>Nessuna sequenza consecutiva estratta nell'ultima giocata.</li>
+                    {% endif %}
+                </ul>
+
+            </div>
+        {% endif %}
+    {% endif %}
+</body>
+</html>
